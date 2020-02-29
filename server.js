@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require('morgan');
 const conn = require('./config/db');
+const errorHandler = require('./middleware/error');
 // const logger = require('./middleware/logger');
 
 // //my logger
@@ -24,6 +25,9 @@ data = {
 
 const app = express();
 
+//body parser
+app.use(express.json());
+
 // Dev logging middleware using custom logger
 if(process.env.NODE_ENV === "development "){
   app.use(morgan('dev'));
@@ -33,6 +37,8 @@ if(process.env.NODE_ENV === "development "){
 app.use('/api/v1/bootcamps', bootcamps, (req, res, next) => {
   
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
