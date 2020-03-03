@@ -10,46 +10,55 @@ exports.getBootcamps = asyncHander(async (req, res, next) => {
   let query;
 
   //copy req.query
-  const reqQuery = {...req.query};
+  const reqQuery = { ...req.query };
 
   //fields to exclude
-  const removeFields = ['select, sort, page, limit'];
+  const removeFields = ["select, sort, page, limit"];
 
   //loop over removed fields and delete them from reqQuery
   removeFields.forEach(param => {
     delete reqQuery[param];
   });
 
+  removeFields.forEach(param => {
+    Object.keys(reqQuery).forEach(key => {
+      param.split(", ").forEach(val => {
+        if (key == val) {
+          delete reqQuery[key];
+        }
+      });
+    });
+  });
+
   //create query string
   let queryString = JSON.stringify(reqQuery);
 
   //creating operator in form $gt, $gte
-  queryString = queryString.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
+  queryString = queryString.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    match => `$${match}`
+  );
 
   //finding resource
-  query = Bootcamp.find(JSON.parse(queryString));
-
-  console.log(reqQuery)
-console.log(req.query)
+  query = Bootcamp.find(JSON.parse(queryString)).populate("courses");
 
   //select fields
-  if(req.query.select){
-    const fields = req.query.select.split(",").join(' ');
-    query= query.select(fields);
+  if (req.query.select) {
+    const fields = req.query.select.split(",").join(" ");
+    query = query.select(fields);
   }
 
   //sortby fields
-  if(req.query.sort){
-    const sortBy = req.query.sort.split(",").join(' ');
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
     query = query.sort(sortBy);
-
-  }else{
-    query = query.sort('-name')
+  } else {
+    query = query.sort("-name");
   }
 
   //pagination
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 5;
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
   const total = await Bootcamp.countDocuments();
@@ -62,18 +71,18 @@ console.log(req.query)
   //pagination result
   const pagination = {};
 
-  if(endIndex < total){
+  if (endIndex < total) {
     pagination.next = {
       page: page + 1,
       limit
-    }
+    };
   }
 
-  if(startIndex > 0){
+  if (startIndex > 0) {
     pagination.prev = {
       page: page - 1,
       limit
-    }
+    };
   }
 
   res.status(200).json({
@@ -139,13 +148,15 @@ exports.updateBootcamp = asyncHander(async (req, res, next) => {
 // @route       DELETE /api/v1/bootcamps/:id
 // @access      Private
 exports.deleteBootcamp = asyncHander(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+  const bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp) {
     return next(
       new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
     );
   }
+
+  bootcamp.remove();
 
   res.status(200).json({
     success: true,
