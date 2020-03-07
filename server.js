@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require('morgan');
+const fileupload = require('express-fileupload')
 const conn = require('./config/db');
 const errorHandler = require('./middleware/error');
 // const logger = require('./middleware/logger');
@@ -19,11 +20,6 @@ conn();
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
 
-data = {
-  name: "clifford",
-  age: 17
-};
-
 const app = express();
 
 //body parser
@@ -33,6 +29,9 @@ app.use(express.json());
 if(process.env.NODE_ENV === "development "){
   app.use(morgan('dev'));
 }
+
+//file uploading
+app.use(fileupload)
 
 //mount routers
 app.use('/api/v1/bootcamps', bootcamps);
