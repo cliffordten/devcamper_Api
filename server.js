@@ -2,7 +2,8 @@ const path = require('path');
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require('morgan');
-const fileupload = require('express-fileupload');   
+const fileupload = require('express-fileupload');  
+const cookieParser = require('cookie-parser'); 
 const conn = require('./config/db');
 const errorHandler = require('./middleware/error');
 // const logger = require('./middleware/logger');
@@ -16,15 +17,18 @@ dotenv.config({ path: "./config/config.env" });
 //connect to database
 conn();
 
-
 //route files
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
+const authentication = require('./routes/auth');
 
 const app = express();
 
-//body parser
+//body pa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         rser
 app.use(express.json());
+
+//cookie parser
+app.use(cookieParser());
 
 // Dev logging middleware using custom logger
 if(process.env.NODE_ENV === "development "){
@@ -40,6 +44,7 @@ app.use(express.static(path.join(__dirname, '')));
 //mount routers
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
+app.use('/api/v1/auth', authentication);
 
 app.use(errorHandler);
 
